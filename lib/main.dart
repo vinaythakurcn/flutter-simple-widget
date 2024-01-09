@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+// ADDED
+import 'package:home_widget/home_widget.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -20,6 +23,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// ADDED
+// TO DO: Replace with your App Group ID
+const String appGroupId = 'group.todowidget';
+const String iOSWidgetName = 'SimpleTodoWidget';
+const String androidWidgetName = 'SimpleTodoWidget';
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
   final String title;
@@ -28,9 +37,31 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+// ADDED
+void updateHeadline(String todo) {
+  HomeWidget.saveWidgetData<String>('todo', todo);
+  HomeWidget.updateWidget(
+    iOSName: iOSWidgetName,
+    androidName: androidWidgetName,
+  );
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   List<String> todo = ['TODO 1', 'TODO 2'];
   final TextEditingController taskNameController = TextEditingController();
+
+  // ADDED
+  @override
+  void initState() {
+    super.initState();
+
+    // Set the group ID
+    HomeWidget.setAppGroupId(appGroupId);
+
+    final newHeadline =
+        todo.isNotEmpty ? todo.elementAt(0) : 'No task available';
+    updateHeadline(newHeadline);
+  }
 
   addTodo() {
     showDialog(
@@ -114,12 +145,17 @@ class _MyHomePageState extends State<MyHomePage> {
             }
             final String item = todo.removeAt(oldIndex);
             todo.insert(newIndex, item);
+
+            // ADDED
+            if (newIndex == 0) {
+              updateHeadline(item);
+            }
           });
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: addTodo,
-        tooltip: 'Increment',
+        tooltip: 'Add Task',
         child: const Icon(Icons.add),
       ),
     );
